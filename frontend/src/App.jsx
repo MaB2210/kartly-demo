@@ -5,6 +5,7 @@ import './App.css'
 function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [placedOrder, setPlacedOrder] = useState(null);
 
   useEffect(() => {
       fetch('http://localhost:8080/products')
@@ -24,6 +25,27 @@ function App() {
     } else{
       setCart([...cart, { product, quantity: 1 }]);
     }
+  }
+
+  function placeOrder() {
+    const orderRequest = {
+      customerName: 'Mann',
+      items: cart.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    fetch('http://localhost:8080/orders', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(orderRequest),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      setPlacedOrder(data);
+      setCart([]);
+    });
   }
 
   const cartTotal = cart.reduce(
@@ -53,6 +75,18 @@ function App() {
         ))}
       </ul>
       <p> Total : ${cartTotal.toFixed(2)}</p>
+
+      {cart.length > 0 && (
+        <button onClick={placeOrder}>Place order</button>
+      )}
+
+      {placedOrder && (
+        <div>
+          <h2>Order confirmed!</h2>
+          <p>Order #{placedOrder.id} - Total: ${placedOrder.totalAmount}</p>
+        </div>
+      )}
+
     </div>
   );
 }
