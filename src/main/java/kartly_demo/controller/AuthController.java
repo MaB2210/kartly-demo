@@ -24,7 +24,7 @@ public class AuthController {
         UserEntity user = new UserEntity();
         user.setEmail(request.getEmail());
         user.setName(request.getName());
-        user.setPassowordHash(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         return userRepository.save(user);
     }
 
@@ -32,7 +32,7 @@ public class AuthController {
     public UserEntity login(@RequestBody LoginRequest request){
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-        if(!passwordEncoder.matches(request.getPassword(),user.getPassowordHash())){
+        if(!passwordEncoder.matches(request.getPassword(),user.getPasswordHash())){
             throw new RuntimeException("Invalid email or password");
         }
         return user;

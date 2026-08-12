@@ -5,8 +5,10 @@ import kartly_demo.dto.OrderItemRequest;
 import kartly_demo.entity.OrderEntity;
 import kartly_demo.entity.OrderItemEntity;
 import kartly_demo.entity.ProductEntity;
+import kartly_demo.entity.UserEntity;
 import kartly_demo.repository.OrderRepository;
 import kartly_demo.repository.ProductRepository;
+import kartly_demo.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -18,10 +20,12 @@ import java.util.List;
 public class OrderController {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public OrderController(OrderRepository orderRepository, ProductRepository productRepository){
+    public OrderController(OrderRepository orderRepository, ProductRepository productRepository,UserRepository userRepository){
         this.orderRepository = orderRepository;
-        this. productRepository = productRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -35,10 +39,18 @@ public class OrderController {
                 .orElseThrow(() -> new RuntimeException("Order not found: "+id));
     }
 
+    @GetMapping("/user/{userId}")
+    public List<OrderEntity> getOrdersForUser(@PathVariable Long userId){
+        return orderRepository.findByUserId(userId);
+    }
+
     @PostMapping
     public OrderEntity createOrder(@RequestBody CreateOrderRequest request){
+        UserEntity user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found: "+ request.getUserId()));
+
         OrderEntity order = new OrderEntity();
-        order.setCustomerName(request.getCustomerName());
+        order.setUser(user);
 
         BigDecimal total = BigDecimal.ZERO;
         for(OrderItemRequest itemRequest: request.getItems()){

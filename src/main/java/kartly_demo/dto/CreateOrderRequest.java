@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class CreateOrderRequest {
-    private String customerName;
+    private Long userId;
     private List<OrderItemRequest> items;
 }
