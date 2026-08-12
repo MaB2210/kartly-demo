@@ -14,6 +14,7 @@ function App() {
   const [cart, setCart] = useState([]);
   const [placedOrder, setPlacedOrder] = useState(null);
   const [orderHistory, setOrderHistory] = useState([]);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   useEffect(() => {
       fetch('http://localhost:8080/products')
@@ -178,8 +179,22 @@ function App() {
       <ul>
         {orderHistory.map((order) => (
           <li key={order.id}>
-            Order #{order.id} - ${order.totalAmount} -{' '}
-            {new Date(order.createdAt).toLocaleString()}
+            <div
+              onClick={() => setExpandedOrderId(expandedOrderId === order.id ?null : order.id)}
+              style={{ cursor: 'pointer'}}>
+              Order #{order.id} - ${order.totalAmount} -{' '}
+              {new Date(order.createdAt).toLocaleString()}
+            </div>
+            {expandedOrderId === order.id && (
+              <ul>
+                {order.items.map((item) => (
+                  <li key={item.id}>
+                    {item.product.name} X {item.quantity} = $
+                    {(item.product.price * item.quantity).toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         ))}
       </ul>
