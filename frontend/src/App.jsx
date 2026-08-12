@@ -3,15 +3,61 @@ import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
+  const[user, setUser] = useState(null);
+  const[authMode, setAuthMode] = useState('login');
+  const[email, setEmail] = useState('');
+  const[password, setPassword] = useState('');
+  const[name, setName] = useState('');
+  const[authError, setAuthError] = useState('');
+
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [orderHistory, setOrderHistory] = useState([]);
 
   useEffect(() => {
       fetch('http://localhost:8080/products')
       .then((response) => response.json())
       .then((data) => setProducts(data));
   }, []);
+
+  useEffect(() =>{
+    if(user){
+      fetch(`http://localhost:8080/orders/user/${user.id}`)
+        .then((response) => response.json())
+        .then((data) => setOrderHistory(data));
+    }
+  }, [user, placedOrder])
+
+  function handleAuth(e){
+    e.preventDefault();
+    setAuthError('');
+
+    const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+    const body = 
+          authMode === 'login'
+          ? {email, password}
+          : {email, password, name};
+
+    fetch(`http://localhost:8080${endpoint}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    }).then((response) => {
+      if(!response.ok){
+        setAuthError('Invalid email or password');
+        return;
+      }
+      response.json().then((data) => setUser(data));
+    });
+  }
+
+  function logout(){
+    setUser(null);
+    setCart([]);
+    setPlacedOrder(null);
+    setOrderHistory([]);
+  }
 
   function addToCart(product){
     const existingItem = cart.find((item) => item.product.id === product.id);
@@ -29,7 +75,7 @@ function App() {
 
   function placeOrder() {
     const orderRequest = {
-      customerName: 'Mann',
+      userId: user.id,
       items: cart.map((item) => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -52,9 +98,50 @@ function App() {
     (sum, item) => sum + item.product.price * item.quantity, 0
   );
 
+  if (!user) {
+    return(
+      <div>
+        <h1>Kartly</h1>
+        <form onSubmit={handleAuth}>
+          <h2>{authMode === 'login' ? 'Log in' : 'Register'}</h2>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {authMode ==='register' && (
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e)=> setName(e.target.value)}
+            />
+          )}
+          <button type="submit">
+            {authMode === 'login' ? 'Log in' : 'Register'}
+          </button>
+      </form>
+      {authError && <p style={{ color: 'red' }}>{authError}</p>}
+      <button onClick={() => setAuthMode(authMode === 'login' ? 'register': 'login')}>
+        {authMode === 'login' ? 'Need an account? Register' : 'Have an account? Log in'}
+      </button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1>Kartly</h1>
+      <p>
+        Logged in as {user.name} <button onClick={logout}>Log out</button>
+      </p>
       <h2>Products</h2>
       <ul>
         {products.map((product) => (
@@ -87,6 +174,15 @@ function App() {
         </div>
       )}
 
+      <h2>Order history</h2>
+      <ul>
+        {orderHistory.map((order) => (
+          <li key={order.id}>
+            Order #{order.id} - ${order.totalAmount} -{' '}
+            {new Date(order.createdAt).toLocaleString()}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
