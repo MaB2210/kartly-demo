@@ -247,7 +247,7 @@ function App() {
       )}
 
       {currentView === 'confirmation' && placedOrder && (
-        <div>
+        <div className="confirmation-view">
           <div className="confirm-banner">
             <p className="heading">Order confirmed</p>
             <p>
