@@ -46,6 +46,14 @@ body {
   width: 100%;
 }
 
+.ticket .btn-ghost {
+  color: #8A8370;
+}
+
+.ticket .btn-ghost:hover {
+  color: var(--paper-ink);
+}
+
 .wordmark {
   font-family: 'Fraunces', serif;
   font-size: 40px;
@@ -83,7 +91,7 @@ body {
 .error-text {
   color: var(--danger);
   font-size: 13px;
-  margin: -4px 0 12px;
+  margin: 10px 0 12px;
 }
 
 /* ---- Header ---- */
