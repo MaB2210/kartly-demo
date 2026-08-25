@@ -6,6 +6,7 @@ import kartly_demo.entity.OrderEntity;
 import kartly_demo.entity.OrderItemEntity;
 import kartly_demo.entity.ProductEntity;
 import kartly_demo.entity.UserEntity;
+import kartly_demo.exception.ResourceNotFoundException;
 import kartly_demo.repository.OrderRepository;
 import kartly_demo.repository.ProductRepository;
 import kartly_demo.repository.UserRepository;
@@ -36,7 +37,7 @@ public class OrderController {
     @GetMapping("/{id}")
     public OrderEntity getOrder(@PathVariable Long id){
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found: "+id));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: "+id));
     }
 
     @GetMapping("/user/{userId}")
@@ -47,7 +48,7 @@ public class OrderController {
     @PostMapping
     public OrderEntity createOrder(@RequestBody CreateOrderRequest request){
         UserEntity user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found: "+ request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: "+ request.getUserId()));
 
         OrderEntity order = new OrderEntity();
         order.setUser(user);
@@ -55,7 +56,7 @@ public class OrderController {
         BigDecimal total = BigDecimal.ZERO;
         for(OrderItemRequest itemRequest: request.getItems()){
             ProductEntity product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found : "+itemRequest.getProductId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found : "+itemRequest.getProductId()));
 
             OrderItemEntity item = new OrderItemEntity();
             item.setProduct(product);
