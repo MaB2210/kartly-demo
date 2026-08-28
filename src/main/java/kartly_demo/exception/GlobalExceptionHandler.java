@@ -25,20 +25,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    //404
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex){
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    //401
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex){
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
+
+    //409
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<Map<String,Object>> handleDuplicate(DuplicateResourceException ex){
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    //400
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String,Object>> handleValidation(MethodArgumentNotValidException ex){
         String message = ex.getBindingResult().getFieldErrors().stream()

@@ -1,0 +1,2 @@
+-- Baseline migration: represents the schema as it existed before Flyway was introduced.
+-- Tables (users, products, orders, order_items) were created by Hibernate auto-DDL prior to this point.
