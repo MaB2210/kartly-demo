@@ -1,13 +1,10 @@
 package kartly_demo.controller;
 
+import jakarta.validation.Valid;
 import kartly_demo.dto.LoginRequest;
 import kartly_demo.dto.RegisterRequest;
 import kartly_demo.entity.UserEntity;
-import kartly_demo.exception.DuplicateResourceException;
-import kartly_demo.exception.InvalidCredentialsException;
-import kartly_demo.repository.UserRepository;
 import kartly_demo.service.AuthService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,12 +18,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public UserEntity register(@RequestBody RegisterRequest request){
+    public UserEntity register(@Valid @RequestBody RegisterRequest request){
         return authService.register(request);
     }
 
     @PostMapping("/login")
-    public UserEntity login(@RequestBody LoginRequest request){
+    public UserEntity login(@Valid @RequestBody LoginRequest request){
         return authService.login(request);
     }
 }

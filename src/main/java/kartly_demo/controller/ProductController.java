@@ -1,10 +1,7 @@
 package kartly_demo.controller;
 
 import kartly_demo.entity.ProductEntity;
-import kartly_demo.repository.ProductRepository;
 import kartly_demo.service.ProductService;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -1,19 +1,11 @@
 package kartly_demo.controller;
 
+import jakarta.validation.Valid;
 import kartly_demo.dto.CreateOrderRequest;
-import kartly_demo.dto.OrderItemRequest;
 import kartly_demo.entity.OrderEntity;
-import kartly_demo.entity.OrderItemEntity;
-import kartly_demo.entity.ProductEntity;
-import kartly_demo.entity.UserEntity;
-import kartly_demo.exception.ResourceNotFoundException;
-import kartly_demo.repository.OrderRepository;
-import kartly_demo.repository.ProductRepository;
-import kartly_demo.repository.UserRepository;
 import kartly_demo.service.OrderService;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -43,7 +35,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderEntity createOrder(@RequestBody CreateOrderRequest request){
+    public OrderEntity createOrder(@Valid @RequestBody CreateOrderRequest request){
         return orderService.createOrder(request);
     }
 }
