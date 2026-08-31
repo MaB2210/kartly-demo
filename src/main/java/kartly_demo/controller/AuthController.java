@@ -1,5 +1,6 @@
 package kartly_demo.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kartly_demo.dto.LoginRequest;
 import kartly_demo.dto.RegisterRequest;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@Tag(name="Orders",description = "Order placement and order history")
 public class AuthController {
     private final AuthService authService;
 
