@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public UserEntity register(RegisterRequest request){
         if(userRepository.findByEmail(request.getEmail()).isPresent()){
@@ -27,12 +28,12 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public UserEntity login(LoginRequest request){
+    public String login(LoginRequest request){
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
         if(!passwordEncoder.matches(request.getPassword(),user.getPasswordHash())){
             throw new InvalidCredentialsException("Invalid email or password");
         }
-        return user;
+        return jwtService.generateToken(user.getEmail());
     }
 }

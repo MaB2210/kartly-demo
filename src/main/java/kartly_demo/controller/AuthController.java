@@ -27,7 +27,7 @@ public class AuthController {
 
     @Operation(summary = "Log in an existing user", description = "Verifies the submitted password against the stored BCrypt hash.")
     @PostMapping("/login")
-    public UserEntity login(@Valid @RequestBody LoginRequest request){
+    public String login(@Valid @RequestBody LoginRequest request){
         return authService.login(request);
     }
 }
