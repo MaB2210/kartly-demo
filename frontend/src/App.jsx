@@ -9,6 +9,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [authError, setAuthError] = useState('');
+  const [token, setToken] = useState(null);
 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -26,11 +27,29 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:8080/orders/user/${user.id}`)
+      fetch(`http://localhost:8080/orders/user/${user.id}`,{
+        headers: {Authorization: `Bearer ${token}`},
+      })
         .then((response) => response.json())
         .then((data) => setOrderHistory(data));
     }
   }, [user, placedOrder]);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/products',{
+      headers: token ? {Authorization: `Bearer ${token}`} : {},
+    })
+    .then((response) => response.json())
+    .then((data) => setProducts(data));
+  }, [token])
+
+  function fetchCurrentUser(authToken){
+    fetch('http://localhost:8080/auth/me', {
+      headers: { Authorization: `Bearer ${authToken}` },
+    })
+    .then((response) => response.json())
+    .then((data) => setUser(data));
+  }
 
   function handleAuth(e) {
     e.preventDefault();
@@ -49,12 +68,20 @@ function App() {
         setAuthError('Invalid email or password');
         return;
       }
-      response.json().then((data) => setUser(data));
+      if(response.ok){
+        response.text().then((token) => {
+          setToken(token);
+          fetchCurrentUser(token);
+        });
+      } else{
+        setAuthMode('login');
+      }
     });
   }
 
   function logout() {
     setUser(null);
+    setToken(null);
     setCart([]);
     setPlacedOrder(null);
     setOrderHistory([]);
@@ -103,7 +130,10 @@ function App() {
 
     fetch('http://localhost:8080/orders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(orderRequest),
     })
       .then((response) => response.json())

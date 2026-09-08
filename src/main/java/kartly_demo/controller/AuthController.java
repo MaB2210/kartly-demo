@@ -7,6 +7,7 @@ import kartly_demo.dto.LoginRequest;
 import kartly_demo.dto.RegisterRequest;
 import kartly_demo.entity.UserEntity;
 import kartly_demo.service.AuthService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,5 +30,10 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@Valid @RequestBody LoginRequest request){
         return authService.login(request);
+    }
+
+    @GetMapping("/me")
+    public UserEntity getCurrent(Authentication authentication){
+        return authService.getUserByEmail(authentication.getName());
     }
 }
