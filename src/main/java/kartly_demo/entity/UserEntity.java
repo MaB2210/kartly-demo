@@ -21,4 +21,7 @@ public class UserEntity {
     private String passwordHash;
 
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.CUSTOMER;
 }
