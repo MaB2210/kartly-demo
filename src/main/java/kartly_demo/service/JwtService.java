@@ -49,7 +49,7 @@ public class JwtService {
             Claims claims = extractAllClaims(token);
             return !claims.getExpiration().before(new Date());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return false;
         }
     }
 

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kartly_demo.entity.ProductEntity;
 import kartly_demo.service.ProductService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Add a new product to the catalog")
     @PostMapping
     public ProductEntity createProduct(@RequestBody ProductEntity product){
