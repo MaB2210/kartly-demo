@@ -34,7 +34,7 @@ public class AuthService {
         if(!passwordEncoder.matches(request.getPassword(),user.getPasswordHash())){
             throw new InvalidCredentialsException("Invalid email or password");
         }
-        return jwtService.generateToken(user.getEmail());
+        return jwtService.generateToken(user.getEmail(), user.getRole().name());
     }
 
     public UserEntity getUserByEmail(String email){
