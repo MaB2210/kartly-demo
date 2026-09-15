@@ -3,7 +3,9 @@ package kartly_demo.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import kartly_demo.dto.AuthResponse;
 import kartly_demo.dto.LoginRequest;
+import kartly_demo.dto.RefreshTokenRequest;
 import kartly_demo.dto.RegisterRequest;
 import kartly_demo.entity.UserEntity;
 import kartly_demo.service.AuthService;
@@ -26,10 +28,16 @@ public class AuthController {
         return authService.register(request);
     }
 
-    @Operation(summary = "Log in an existing user", description = "Verifies the submitted password against the stored BCrypt hash.")
+    @Operation(summary = "Log in an existing user", description = "Returns both an access token and refresh token")
     @PostMapping("/login")
-    public String login(@Valid @RequestBody LoginRequest request){
+    public AuthResponse login(@Valid @RequestBody LoginRequest request){
         return authService.login(request);
+    }
+
+    @Operation(summary = "Exchange a refresh token for new access token")
+    @PostMapping("/refresh")
+    public AuthResponse refresh(@Valid @RequestBody RefreshTokenRequest request){
+        return authService.refreshAccessToken(request.getRefreshToken());
     }
 
     @GetMapping("/me")
