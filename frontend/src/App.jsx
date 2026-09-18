@@ -9,7 +9,7 @@ function App() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [authError, setAuthError] = useState('');
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -20,10 +20,24 @@ function App() {
   const [revealedPhotoId, setRevealedPhotoId] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/products')
-      .then((response) => response.json())
-      .then((data) => setProducts(data));
-  }, []);
+    if (window.location.pathname == '/oauth-callback') {
+      const params = new URLSearchParams(window.location.search);
+      const accessToken = params.get('accessToken');
+      const refreshToken = params.get('refreshToken');
+
+      if (accessToken) {
+        localStorage.setItem('token', accessToken)
+        localStorage.setItem('refreshToken', refreshToken);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init reading the OAuth redirect URL on mount, not a reactive subscription
+        setToken(accessToken);
+        fetchCurrentUser(accessToken);
+        window.history.replaceState({}, document.title, '/');
+      }
+    } else if (token) {
+      fetchCurrentUser(token);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only: checks the initial URL/token once, must not re-run on token changes
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -33,14 +47,21 @@ function App() {
         .then((response) => response.json())
         .then((data) => setOrderHistory(data));
     }
-  }, [user, placedOrder]);
+  }, [user, token, placedOrder]);
 
   useEffect(() => {
+    if(!token) return;
+
     fetch('http://localhost:8080/products',{
-      headers: token ? {Authorization: `Bearer ${token}`} : {},
+      headers: { Authorization: `Bearer ${token}`},
     })
-    .then((response) => response.json())
-    .then((data) => setProducts(data));
+    .then((response) => {
+      if(!response.ok){
+        return [];
+      }
+      return response.json();
+    })
+    .then((data) => setProducts(Array.isArray(data) ? data : []));
   }, [token])
 
   function fetchCurrentUser(authToken){
@@ -68,10 +89,12 @@ function App() {
         setAuthError('Invalid email or password');
         return;
       }
-      if(response.ok){
-        response.text().then((token) => {
-          setToken(token);
-          fetchCurrentUser(token);
+      if(authMode === 'login'){
+        response.json().then((data) => {
+          localStorage.setItem('token', data.accessToken);
+          localStorage.setItem('refreshToken', data.refreshToken);
+          setToken(data.accessToken);
+          fetchCurrentUser(data.accessToken);
         });
       } else{
         setAuthMode('login');
@@ -80,6 +103,8 @@ function App() {
   }
 
   function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     setUser(null);
     setToken(null);
     setCart([]);
@@ -194,6 +219,14 @@ function App() {
             {authMode === 'login'
               ? 'Need an account? Register'
               : 'Have an account? Log in'}
+          </button>
+          <button className="btn btn-accent btn-full" type="button" 
+            onClick={() => {
+            window.location.href = "http://localhost:8080/oauth2/authorization/auth0"
+          }}
+          style={{marginTop: '12px'}}
+          >
+            Continue with Auth0
           </button>
         </div>
       </div>
