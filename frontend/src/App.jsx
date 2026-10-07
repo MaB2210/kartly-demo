@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import './App.css';
 
-const API_BASE = 'http://localhost:8090/api';
+const API_BASE = 'http://localhost:8080/api';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -227,7 +227,7 @@ function App() {
           </button>
           <button className="btn btn-accent btn-full" type="button"
             onClick={() => {
-            window.location.href = "http://localhost:8090/oauth2/authorization/auth0"
+            window.location.href = "http://localhost:8080/oauth2/authorization/auth0"
           }}
           style={{marginTop: '12px'}}
           >
