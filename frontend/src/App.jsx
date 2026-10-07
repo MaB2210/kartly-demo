@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import './App.css';
 
+const API_BASE = 'http://localhost:8090/api';
+
 function App() {
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState('login');
@@ -41,8 +43,8 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:8080/orders/user/${user.id}`,{
-        headers: {Authorization: `Bearer ${token}`},
+      fetch(`${API_BASE}/orders/user/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
         .then((response) => response.json())
         .then((data) => setOrderHistory(data));
@@ -52,7 +54,7 @@ function App() {
   useEffect(() => {
     if(!token) return;
 
-    fetch('http://localhost:8080/products',{
+    fetch(`${API_BASE}/products`,{
       headers: { Authorization: `Bearer ${token}`},
     })
     .then((response) => {
@@ -65,7 +67,7 @@ function App() {
   }, [token])
 
   function fetchCurrentUser(authToken){
-    fetch('http://localhost:8080/auth/me', {
+    fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: `Bearer ${authToken}` },
     })
     .then((response) => response.json())
@@ -80,7 +82,7 @@ function App() {
     const body =
       authMode === 'login' ? { email, password } : { email, password, name };
 
-    fetch(`http://localhost:8080${endpoint}`, {
+    fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -153,20 +155,23 @@ function App() {
       })),
     };
 
-    fetch('http://localhost:8080/orders', {
+    fetch(`${API_BASE}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(orderRequest),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setPlacedOrder(data);
-        setCart([]);
-        setCurrentView('confirmation');
-      });
+    }).then(async (response) => {
+      const text = await response.text();
+      if(!response.ok){
+        alert(`Order failed: ${response.status}\n${text}`);
+        return;
+      }
+      setPlacedOrder(JSON.parse(text));
+      setCart([]);
+      setCurrentView('confirmation');
+    });
   }
 
   const cartTotal = cart.reduce(
@@ -220,9 +225,9 @@ function App() {
               ? 'Need an account? Register'
               : 'Have an account? Log in'}
           </button>
-          <button className="btn btn-accent btn-full" type="button" 
+          <button className="btn btn-accent btn-full" type="button"
             onClick={() => {
-            window.location.href = "http://localhost:8080/oauth2/authorization/auth0"
+            window.location.href = "http://localhost:8090/oauth2/authorization/auth0"
           }}
           style={{marginTop: '12px'}}
           >
@@ -343,32 +348,37 @@ function App() {
               </div>
               {expandedOrderId === order.id && (
                 <div className="items">
-                  {order.items.map((item) => (
-                    <div className="line-item" key={item.id}>
-                      <span
-                        className="name"
-                        onClick={() =>
-                          setRevealedPhotoId(
-                            revealedPhotoId === item.id ? null : item.id
-                          )
-                        }
-                      >
-                        {item.product.name}
-                      </span>
-                      <span className="leader"></span>
-                      <span className="qty">× {item.quantity}</span>
-                      <span className="price">
-                        ${(item.product.price * item.quantity).toFixed(2)}
-                      </span>
-                      {revealedPhotoId === item.id && (
-                        <img
-                          className="reveal-photo"
-                          src={item.product.imageUrl}
-                          alt={item.product.name}
-                        />
-                      )}
-                    </div>
-                  ))}
+                  {order.items.map((item) => {
+                    const product = products.find((p) => p.id === item.productId);
+                    return (
+                      <div className="line-item" key={item.id}>
+                        <span
+                          className="name"
+                          onClick={() =>
+                            setRevealedPhotoId(
+                              revealedPhotoId === item.id ? null : item.id
+                            )
+                          }
+                        >
+                          {item.productName}
+                        </span>
+                        <span className="leader"></span>
+                        <span className="qty">× {item.quantity}</span>
+                        {product && (
+                          <span className="price">
+                            ${(product.price * item.quantity).toFixed(2)}
+                          </span>
+                        )}
+                        {revealedPhotoId === item.id && product && (
+                          <img
+                            className="reveal-photo"
+                            src={product.imageUrl}
+                            alt={product.name}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
