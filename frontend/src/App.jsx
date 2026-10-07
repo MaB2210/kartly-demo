@@ -363,10 +363,14 @@ function App() {
                           {item.productName}
                         </span>
                         <span className="leader"></span>
-                        <span className="qty">× {item.quantity}</span>
-                        {product && (
+                        <span className="qty">
+                          {item.unitPrice != null
+                            ? `$${item.unitPrice.toFixed(2)} × ${item.quantity}`
+                            : `× ${item.quantity}`}
+                        </span>
+                        {item.unitPrice != null && (
                           <span className="price">
-                            ${(product.price * item.quantity).toFixed(2)}
+                            ${(item.unitPrice * item.quantity).toFixed(2)}
                           </span>
                         )}
                         {revealedPhotoId === item.id && product && (
